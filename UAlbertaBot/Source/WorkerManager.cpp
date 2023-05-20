@@ -5,6 +5,7 @@
 #include "Global.h"
 #include "BuildingData.h"
 #include "bwem.h"
+#include "InformationManager.h"
 
 using namespace UAlbertaBot;
 
@@ -55,15 +56,21 @@ void WorkerManager::updateWorkerStatus()
             m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
         }
 
-        if (BWAPI::Broodwar->getFrameCount() % 96 == 0)
+        // TODO: Possible solution for stacking SCV. Need more testing.
+        /*if (BWAPI::Broodwar->getFrameCount() % 48 == 0)
         {
             if (m_workerData.getWorkerJob(worker) == WorkerData::Build || m_workerData.getWorkerJob(worker) == WorkerData::Idle)
             {
-                //std::cout << "ID: " << worker->getID() << "\tStatus: " << m_workerData.getWorkerJob(worker) << std::endl;
-                
-                //setMineralWorker(worker);
+                for (auto b : Global::Info().getBuildingI())
+                {
+                    if (b.builderUnit == worker && b.status != BuildingStatus::UnderConstruction)
+                    {
+                        std::cout << "SCV_ID: " << worker->getID() << std::endl;
+                        worker->stop();
+                    }
+                }
             }
-        }
+        }*/
 
         // if its job is gas
         if (m_workerData.getWorkerJob(worker) == WorkerData::Gas)
