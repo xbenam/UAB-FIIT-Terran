@@ -79,7 +79,7 @@ void UAlbertaBotModule::onEnd(bool isWinner)
     std::ofstream outfile;
 
     outfile.open("D:\\Skola\\FIIT\\BP\\new-vulture-rush.txt", std::ios_base::app); // append instead of overwrite
-    outfile << BWAPI::Broodwar->elapsedTime() << ";" << (isWinner ? "Winner;" : "Loser;") << BWAPI::Broodwar->enemy()->getName()<< ";" << BWAPI::Broodwar->mapName() << "\n";
+    outfile << BWAPI::Broodwar->elapsedTime()<<";" << (int)(BWAPI::Broodwar->getFrameCount() / (23.8)) << ";" << (isWinner ? "Winner;" : "Loser;") << BWAPI::Broodwar->enemy()->getName() << ";" << BWAPI::Broodwar->mapName() << "\n";
     outfile.close();
     //std::cout << BWAPI::Broodwar->elapsedTime() << "\t" << "Result: " << (isWinner ? "Winner" : "loser")  << std::endl;
 	

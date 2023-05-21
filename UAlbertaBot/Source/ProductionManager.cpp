@@ -50,7 +50,7 @@ void ProductionManager::performBuildOrderSearch()
     }
 }
 
-bool tmp()
+bool existValidCCforComsatStation()
 {
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
     {
@@ -153,7 +153,7 @@ void ProductionManager::update()
 
     // check the _queue for stuff we can build
     manageBuildOrderQueue();
-
+   
     if (Global::Info().getRushInfo() && !Global::Info().getMode())
     {
         if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
@@ -296,8 +296,6 @@ void ProductionManager::update()
         m_queue.queueAsHighestPriority(MetaType(BWAPI::Broodwar->self()->getRace().getSupplyProvider()), true);
     }
 
-    // if they have cloaked units get a new goal asap
-    //if (!m_enemyCloakedDetected && Global::Info().enemyHasCloakedUnits())
     // condition up is always false becouse the m_enemyCloakedDetected changes only in this method
     if (Global::Info().enemyHasCloakedUnits())
     {
@@ -330,47 +328,26 @@ void ProductionManager::update()
             {
                 m_queue.queueAsHighestPriority(MetaType(BWAPI::UnitTypes::Terran_Engineering_Bay), true);
             }
-            
-            const BWAPI::UnitType comsatStationType = BWAPI::UnitTypes::Terran_Comsat_Station;
 
-            // Check if there is a Comsat Station already in the build queue
-            bool comsatStationQueued = m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Comsat_Station));
-            bool academyQueued = m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Academy));
-            
+            int const academyCount = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Academy);
+            int const comsatStationCount = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Comsat_Station);
+            int const ccCount = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Command_Center);
 
-            int acC = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Academy);
-            bool acBB = m_buildingManager.isBeingBuilt(BWAPI::UnitTypes::Terran_Academy);
-            bool csBB = m_buildingManager.isBeingBuilt(BWAPI::UnitTypes::Terran_Comsat_Station);
+            bool const comsatStationQueued = m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Comsat_Station));
+            bool const academyQueued = m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Academy));
 
-            if (acC != 0 && !acBB && !comsatStationQueued && !csBB && tmp() && m_comsatStationCount < BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Command_Center))
+            // check if a Comsat Station is already in the build queue, if it is not, add it
+            if (academyCount != 0 && !comsatStationQueued &&
+                existValidCCforComsatStation() &&
+                comsatStationCount < ccCount)
             {
-                m_comsatStationCount++;
                 m_queue.queueAsHighestPriority(MetaType(BWAPI::UnitTypes::Terran_Comsat_Station), true);
             }
             
-            if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Academy) == 0  && 
-                !m_buildingManager.isBeingBuilt(BWAPI::UnitTypes::Terran_Academy) &&
-                !academyQueued)
+            if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Academy) == 0  && !academyQueued)
             {
                 m_queue.queueAsHighestPriority(MetaType(BWAPI::UnitTypes::Terran_Academy), true);
             }
-
-          /*  if (BWAPI::Broodwar->enemy()->getRace() == BWAPI::Races::Protoss)
-            {
-                if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Missile_Turret) < 2 && 
-                    !m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Missile_Turret)) &&
-                    m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Engineering_Bay)))
-                {
-                    m_queue.queueAsHighestPriority(MetaType(BWAPI::UnitTypes::Terran_Missile_Turret), false);
-                    m_queue.queueAsHighestPriority(MetaType(BWAPI::UnitTypes::Terran_Missile_Turret), false);
-                }
-
-                if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Engineering_Bay) == 0 &&
-                    !m_queue.isInQueue(MetaType(BWAPI::UnitTypes::Terran_Engineering_Bay)))
-                {
-                    m_queue.queueAsHighestPriority(MetaType(BWAPI::UnitTypes::Terran_Engineering_Bay), false);
-                }
-            }*/
         }
 
         if (Config::Debug::DrawBuildOrderSearchInfo)

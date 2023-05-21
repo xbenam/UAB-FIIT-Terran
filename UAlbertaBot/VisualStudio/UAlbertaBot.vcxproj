@@ -73,6 +73,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(BWAPI_DIR)/Debug/BWAPILIB.lib;$(BWAPI_DIR)/Debug/BWAPIClient.lib;$(Configuration)/SparCraft/SparCraft_d.lib;../../BOSS/bin/BOSS_d.lib;%(AdditionalDependencies)</AdditionalDependencies>

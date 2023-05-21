@@ -122,7 +122,7 @@ void BaseLocationManager::onFrame()
 
     drawBaseLocations();
 
-    // reset the player occupation information for each location
+    // reset the player and enemy occupation information for each location
     for (auto & baseLocation : m_baseLocationData)
     {
         baseLocation.setPlayerOccupying(BWAPI::Broodwar->self(), false);
@@ -304,30 +304,26 @@ BWAPI::TilePosition BaseLocationManager::getNextExpansion(BWAPI::Player player) 
 
         bool buildingInTheWay = false;
 
-        // get the tile position of the base 4 and 3 are 
+        // get the tile position of the base and check if the location for it is not blocked by buildings
         BWAPI::TilePosition tile = base->getDepotPosition();
         for (size_t i = 0; i < CC_width; ++i)
         {
             for (size_t j = 0; j < CC_height; ++j)
             {
-                //BWAPI::Broodwar->drawBoxMap(tile.x * 32, tile.y * 32, tile.x * 32 + 32*4, tile.y * 32 + 32*3, BWAPI::Colors::Green);
-
                 BWAPI::TilePosition const tilePos(tile.x + i, tile.y + j);
 
                 for (auto& u : BWAPI::Broodwar->getUnitsOnTile(tilePos.x, tilePos.y))
                 {
-                    //std::cout << u->getType().getName() << std::endl;
                     if (u->getType().isBuilding())
                     {
-                        //BWAPI::Broodwar->drawBoxMap(tile.x * 32, tile.y * 32, tile.x * 32 + 32 * 4, tile.y * 32 + 32 * 3, BWAPI::Colors::Red);
-
                         buildingInTheWay = true;
                     }
                 }
 
             }
         }
-
+        
+        // skip locations that are blocked by our buildings 
         if (buildingInTheWay)
         {
             continue;
