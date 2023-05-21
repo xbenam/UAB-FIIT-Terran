@@ -252,6 +252,16 @@ void InformationManager::drawMapInformation()
 	
 }
 
+std::vector<Building> UAlbertaBot::InformationManager::getBuildingI()
+{
+    return m_buidlingsI;
+}
+
+void UAlbertaBot::InformationManager::setBuildingI(std::vector<Building> m)
+{
+    m_buidlingsI = m;
+}
+
 void InformationManager::updateUnit(BWAPI::Unit unit)
 {
     if (!(unit->getPlayer() == BWAPI::Broodwar->self() || unit->getPlayer() == BWAPI::Broodwar->enemy()))
@@ -422,7 +432,8 @@ const UnitData & InformationManager::getUnitData(BWAPI::Player player) const
 
 void InformationManager::removeOldScans()
 {
-    for (std::pair<int, BWAPI::Position> &scan : m_scans)
+    // look at every scan and remove it if it is old 
+    for (std::pair<int, BWAPI::Position> const &scan : m_scans)
     {
         if (scan.first + 288 <= BWAPI::Broodwar->getFrameCount())
         {
@@ -473,20 +484,19 @@ bool at_least_3_combat_units_near_unit(BWAPI::Unit enemy_unit)
 
 bool InformationManager::enemyHasCloakedUnits()
 {
-    for (auto kv : BWAPI::Broodwar->enemy()->getUnits())
+    for (auto cloakedUnit : BWAPI::Broodwar->enemy()->getUnits())
 	{
-        if (kv->isCloaked() || kv->getType() == BWAPI::UnitTypes::Zerg_Lurker)
+        // check if the unit can cloak or if it is a lurker 
+        if (cloakedUnit->isCloaked() || cloakedUnit->getType() == BWAPI::UnitTypes::Zerg_Lurker)
         {
-            const BWAPI::Order scannerOrder = BWAPI::Orders::Scanner;
-
-            // Find an eligible unit to cast the Scan ability
+            // find an eligible unit to cast the Scan ability
             BWAPI::Unit scanCaster = nullptr;
-            for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+            for (auto& scanner : BWAPI::Broodwar->self()->getUnits())
             {
-                if (unit->getType() == BWAPI::UnitTypes::Terran_Comsat_Station &&
-                    unit->getEnergy() >= BWAPI::TechTypes::Scanner_Sweep.energyCost())
+                if (scanner->getType() == BWAPI::UnitTypes::Terran_Comsat_Station &&
+                    scanner->getEnergy() >= BWAPI::TechTypes::Scanner_Sweep.energyCost())
                 {
-                    scanCaster = unit;
+                    scanCaster = scanner;
                     break;
                 }
             }
@@ -494,15 +504,15 @@ bool InformationManager::enemyHasCloakedUnits()
             removeOldScans();
 
             // If a valid caster is found, issue the Scan order
-            if (scanCaster != nullptr && (kv->isCloaked() || kv->isBurrowed()) && !kv->isDetected())
+            if (scanCaster != nullptr && (cloakedUnit->isCloaked() || cloakedUnit->isBurrowed()) && !cloakedUnit->isDetected())
             {
-                if (kv->getType() == BWAPI::UnitTypes::Protoss_Observer && BWAPI::Broodwar->getFrameCount() <= 40000)
+                if (cloakedUnit->getType() == BWAPI::UnitTypes::Protoss_Observer && BWAPI::Broodwar->getFrameCount() <= 40000)
                 {
                     return false;
                 }
-                BWAPI::Position scanPosition = kv->getPosition(); // Position to scan
+                BWAPI::Position scanPosition = cloakedUnit->getPosition(); // Position to scan
 
-                if (!at_least_3_combat_units_near_unit(kv))
+                if (!at_least_3_combat_units_near_unit(cloakedUnit))
                 {
                     return false;
                 }
@@ -518,12 +528,12 @@ bool InformationManager::enemyHasCloakedUnits()
         }
 
         // assume they're going dts
-        if (kv->getType() == BWAPI::UnitTypes::Protoss_Citadel_of_Adun || kv->getType() == BWAPI::UnitTypes::Protoss_Cybernetics_Core)
+        if (cloakedUnit->getType() == BWAPI::UnitTypes::Protoss_Citadel_of_Adun || cloakedUnit->getType() == BWAPI::UnitTypes::Protoss_Cybernetics_Core)
         {
             return true;
         }
 
-        if (kv->getType() == BWAPI::UnitTypes::Protoss_Observatory)
+        if (cloakedUnit->getType() == BWAPI::UnitTypes::Protoss_Observatory)
         {
             return true;
         }

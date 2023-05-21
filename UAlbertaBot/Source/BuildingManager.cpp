@@ -30,6 +30,7 @@ void BuildingManager::update()
     
     rushDefence();
 
+    Global::Info().setBuildingI(m_buildings);
 
     drawBuildingInformation(200, 50);
     m_buildingPlacer.drawReservedTiles();
@@ -270,14 +271,13 @@ void BuildingManager::checkForDeadTerranBuilders()
         return;
     for (auto & b : m_buildings)
     {
-        // for each building under construction chcek status assigned worker
+        // for each building under construction chcek status of assigned worker
         if (b.status == BuildingStatus::UnderConstruction && !b.builderUnit->exists())
         {
             // constructig worker was killed, setting back to status @Unassigned
             b.status = BuildingStatus::Unassigned;
         }
     }
-
 }
 
 // STEP 6: CHECK FOR COMPLETED BUILDINGS
@@ -516,9 +516,6 @@ void BuildingManager::removeBuildings(const std::vector<Building> & toRemove)
 
 BWAPI::TilePosition BuildingManager::rushDefence()
 {
-
-    //if (Global::Info().getDtRushInfo())
-    //{
     const BWEM::Map& mapa = BWEM::Map::Instance();
     const BaseLocation* selfBaseLocation = Global::Bases().getPlayerStartingBaseLocation(BWAPI::Broodwar->self());
     const BWEM::ChokePoint* closestChokepoint = nullptr;
@@ -533,14 +530,12 @@ BWAPI::TilePosition BuildingManager::rushDefence()
             closestChokepoint = choke;
         }
     }
-    int a = int(0.8 * (BWAPI::Position(closestChokepoint->Center()).x - selfBaseLocation->getPosition().x));
-    int b = int(0.8 * (BWAPI::Position(closestChokepoint->Center()).y - selfBaseLocation->getPosition().y));
-    int x = selfBaseLocation->getPosition().x + a;
-    int y = selfBaseLocation->getPosition().y + b;
-    BWAPI::Position xa = BWAPI::Position(x, y);
-    //Get the tile position of the choke point
 
-    // Check if there is already a missile turret within 5 tiles of the choke point
+    int x = selfBaseLocation->getPosition().x + int(0.8 * (BWAPI::Position(closestChokepoint->Center()).x - selfBaseLocation->getPosition().x));
+    int y = selfBaseLocation->getPosition().y + int(0.8 * (BWAPI::Position(closestChokepoint->Center()).y - selfBaseLocation->getPosition().y));
+    BWAPI::Position xa = BWAPI::Position(x, y);
+
+    // check if there is already a missile turret or bunker within 5 tiles of the choke point
     bool hasMissileTurretNearby = false;
     for (auto unit : BWAPI::Broodwar->getUnitsInRadius(xa, 5 * 32))
     {
@@ -551,25 +546,10 @@ BWAPI::TilePosition BuildingManager::rushDefence()
         }
     }
 
-    // If there is no missile turret nearby, build one with a worker
+    // if there is no missile turret nearby, build one with a worker
     if (!hasMissileTurretNearby)
     {
-        // Find a worker near the choke point
-        //BWAPI::Unit workerToAssign = Global::Workers().getBuilder(b);
-        //BWAPI::Unit worker = nullptr;
-        //for (auto unit : BWAPI::Broodwar->self()->getUnits())
-        //{
-        //    if (unit->getType().isWorker() )
-        //    {
-        //        worker = unit;
-        //        break;
-        //    }
-        //}
-
-        // If we found a worker, order it to build a missile turret near the choke point
-
-        return  BWAPI::TilePosition(xa); // Build the turret 2 tiles to the right and 2 tiles down from the choke point
+        return  BWAPI::TilePosition(xa);
     }
     return  BWAPI::TilePosition(xa);
-    //}
 }

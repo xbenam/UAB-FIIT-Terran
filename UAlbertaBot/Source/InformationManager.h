@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "UnitData.h"
+#include "BuildingData.h"
 
 namespace UAlbertaBot
 {
@@ -15,6 +16,7 @@ class InformationManager
 
     std::map<BWAPI::Player, UnitData> m_unitData;
     std::vector<std::pair<int, BWAPI::Position>> m_scans;
+    std::vector<Building> m_buidlingsI;
 
     bool m_rushIncoming = false;
     bool m_enemyExpanding = false;
@@ -63,6 +65,9 @@ public:
     void drawExtendedInterface();
     void drawUnitInformation(int x, int y);
     void drawMapInformation();
+    std::vector<Building> getBuildingI();
+    void setBuildingI(std::vector<Building> m);
+
 
     const UIMap &    getUnitInfo(BWAPI::Player player) const;
     const UnitData & getUnitData(BWAPI::Player player) const;
